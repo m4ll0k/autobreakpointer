@@ -25,6 +25,11 @@ node src/autobreakpointer.js "document.cookie"
 node src/autobreakpointer.js
 ```
 
+### demo
+
+![poc](https://github.com/user-attachments/assets/356cc887-60ac-4dfa-85c4-f6d77ac24307)
+
+
 ### Programmatic Usage
 ```javascript
 const AutoBreakpointer = require('./src/autobreakpointer');
