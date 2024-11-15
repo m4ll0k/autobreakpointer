@@ -14,6 +14,10 @@ npm install
 
 ### CLI Usage
 ```bash
+# Run your chrome
+
+google-chrome --remote-debugging-port=9222
+
 # Track specific string
 node src/autobreakpointer.js "document.cookie"
 
