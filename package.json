@@ -1,0 +1,35 @@
+{
+    "name": "auto-breakpointer",
+    "version": "1.0.0",
+    "description": "Automated JavaScript Debugging Tool using Chrome DevTools Protocol",
+    "main": "src/autobreakpointer.js",
+    "bin": {
+      "auto-breakpointer": "./src/autobreakpointer.js"
+    },
+    "scripts": {
+      "start": "node src/autobreakpointer.js",
+      "example": "node examples/basic.js"
+    },
+    "keywords": [
+      "debugging",
+      "chrome",
+      "devtools",
+      "breakpoints",
+      "automation"
+    ],
+    "author": "m4ll0k",
+    "license": "MIT",
+    "dependencies": {
+      "chrome-remote-interface": "^0.32.1"
+    },
+    "engines": {
+      "node": ">=12"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/yourusername/auto-breakpointer.git"
+    },
+    "bugs": {
+      "url": "https://github.com/yourusername/auto-breakpointer/issues"
+    }
+  }
