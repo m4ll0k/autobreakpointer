@@ -2,14 +2,13 @@
  * AutoBreakpointer
  * Automated JavaScript Debugging Tool using Chrome DevTools Protocol
  * Automatically sets breakpoints for specified strings/patterns in JavaScript code
- * Version: beta 1.0.0
+ * Version: beta 1.1.0
  * License: MIT
  */
 
-
 /** usage:
  * run: google-chrome --remote-debugging-port=9222
- * then: node autobreakpointer "location.search"
+ * then: node autobreakpointer "location.search|.innerHTML|document.write"
  */
 
 const CDP = require('chrome-remote-interface');
@@ -19,7 +18,9 @@ class AutoBreakpointer {
         this.existingBreakpoints = new Set();
         this.client = null;
         this.config = {
-            target: options.target || 'location.search',
+            targets: Array.isArray(options.target) 
+                ? options.target 
+                : options.target.split('|').map(t => t.trim()),
             caseSensitive: options.caseSensitive || true,
             autoResume: options.autoResume || false,
             jsFilesOnly: options.jsFilesOnly || true,
@@ -37,7 +38,7 @@ class AutoBreakpointer {
                 Runtime.enable()
             ]);
 
-            console.log(`AutoBreakpointer: Initialized for "${this.config.target}"`);
+            console.log('AutoBreakpointer: Initialized for patterns:', this.config.targets);
             return true;
         } catch (error) {
             console.error('AutoBreakpointer: Connection error:', error);
@@ -55,23 +56,26 @@ class AutoBreakpointer {
         Debugger.scriptParsed(async (script) => {
             if (!this.config.jsFilesOnly || script.url.endsWith(this.config.urlPattern)) {
                 console.log('Script detected:', script.url);
-                try {
-                    const searchResult = await Debugger.searchInContent({
-                        scriptId: script.scriptId,
-                        query: this.config.target,
-                        caseSensitive: this.config.caseSensitive,
-                        isRegex: false
-                    });
+                
+                for (const target of this.config.targets) {
+                    try {
+                        const searchResult = await Debugger.searchInContent({
+                            scriptId: script.scriptId,
+                            query: target,
+                            caseSensitive: this.config.caseSensitive,
+                            isRegex: false
+                        });
 
-                    if (searchResult.result?.length > 0) {
-                        console.log('Match found:', searchResult);
-                        for (const match of searchResult.result) {
-                            await this.setBreakpoint(script, match);
+                        if (searchResult.result?.length > 0) {
+                            console.log(`Match found for "${target}":`, searchResult);
+                            for (const match of searchResult.result) {
+                                await this.setBreakpoint(script, match, target);
+                            }
                         }
-                    }
-                } catch (error) {
-                    if (!error.message.includes('already exists')) {
-                        console.error('AutoBreakpointer: Search error:', error);
+                    } catch (error) {
+                        if (!error.message.includes('already exists')) {
+                            console.error(`AutoBreakpointer: Search error for "${target}":`, error);
+                        }
                     }
                 }
             }
@@ -84,10 +88,10 @@ class AutoBreakpointer {
         this.setupCleanup();
     }
 
-    async setBreakpoint(script, match) {
+    async setBreakpoint(script, match, target) {
         const { Debugger } = this.client;
         const { lineNumber, lineContent } = match;
-        const columnNumber = lineContent.indexOf(this.config.target);
+        const columnNumber = lineContent.indexOf(target);
         const breakpointKey = `${script.url}-${lineNumber}-${columnNumber}`;
 
         if (!this.existingBreakpoints.has(breakpointKey)) {
@@ -102,6 +106,7 @@ class AutoBreakpointer {
 
                 console.log({
                     message: 'AutoBreakpointer: New breakpoint set',
+                    pattern: target,
                     scriptId: script.scriptId,
                     line: lineNumber,
                     column: columnNumber,
@@ -120,16 +125,25 @@ class AutoBreakpointer {
         const frame = callFrames[0];
 
         try {
-            const valueResult = await Runtime.evaluate({
-                expression: this.config.target
-            }).catch(() => ({ result: { value: 'Unable to evaluate' } }));
+            // Try to evaluate all targets at the breakpoint
+            const evaluations = await Promise.all(
+                this.config.targets.map(async target => {
+                    const result = await Runtime.evaluate({
+                        expression: target
+                    }).catch(() => ({ result: { value: 'Unable to evaluate' } }));
+                    
+                    return {
+                        target,
+                        value: result.result.value
+                    };
+                })
+            );
 
             console.log('AutoBreakpointer: Break', {
                 url: frame.url,
                 line: frame.location.lineNumber,
                 column: frame.location.columnNumber,
-                value: valueResult.result.value,
-                target: this.config.target,
+                evaluations,
                 stackTrace: this.formatStackTrace(callFrames)
             });
 
