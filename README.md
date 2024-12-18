@@ -1,6 +1,6 @@
 # AutoBreakpointer
 
-AutoBreakpointer (beta v1.0.0) is a Chrome DevTools Protocol based tool that automatically sets breakpoints for specified strings or patterns in JavaScript code. It's particularly useful for debugging and monitoring specific JavaScript functions or properties across multiple files when you test your targets!
+AutoBreakpointer (beta v1.1.0) is a Chrome DevTools Protocol based tool that automatically sets breakpoints for specified strings or patterns in JavaScript code. It's particularly useful for debugging and monitoring specific JavaScript functions or properties across multiple files when you test your targets!
 
 ## Installation
 
