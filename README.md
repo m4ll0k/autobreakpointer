@@ -23,6 +23,9 @@ node src/autobreakpointer.js "document.cookie"
 
 # Default tracking location.search
 node src/autobreakpointer.js
+
+# Track multiple strings
+node autobreakpointer "location.search|.innerHTML|document.write"
 ```
 
 ### demo
