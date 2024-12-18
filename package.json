@@ -27,9 +27,9 @@
     },
     "repository": {
       "type": "git",
-      "url": "git+https://github.com/yourusername/auto-breakpointer.git"
+      "url": "git+https://github.com/m4ll0k/autobreakpointer.git"
     },
     "bugs": {
-      "url": "https://github.com/yourusername/auto-breakpointer/issues"
+      "url": "https://github.com/m4ll0k/autobreakpointer/issues"
     }
   }
