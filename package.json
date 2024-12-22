@@ -1,6 +1,6 @@
 {
     "name": "auto-breakpointer",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Automated JavaScript Debugging Tool using Chrome DevTools Protocol",
     "main": "src/autobreakpointer.js",
     "bin": {
